@@ -1,0 +1,28 @@
+visitas/ (colección)
+  ├── {visitaId} (documento)
+  │   ├── infoBasica: (mapa)
+  │   │   ├── cliente: string
+  │   │   ├── direccion: string
+  │   │   ├── fecha: string
+  │   │   └── hora: string
+  │   │
+  │   ├── tareas: (array de mapas)
+  │   │   ├── id: string
+  │   │   ├── descripcion: string
+  │   │   ├── completada: boolean
+  │   │   ├── tiempoEstimado: number (minutos)
+  │   │   ├── tiempoInicio: timestamp
+  │   │   └── tiempoFin: timestamp
+  │   │
+  │   ├── fotos: (array de mapas)
+  │   │   ├── url: string
+  │   │   ├── nombre: string
+  │   │   └── fecha: timestamp
+  │   │
+  │   ├── metadatos: (mapa)
+  │   │   ├── creadoPor: string (userId)
+  │   │   ├── fechaCreacion: timestamp
+  │   │   ├── ultimaActualizacion: timestamp
+  │   │   └── estado: string (pendiente, en_progreso, completada, finalizada)
+  │   │
+  │   └── observaciones: string
