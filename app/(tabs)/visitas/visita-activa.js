@@ -238,6 +238,62 @@ export default function VisitaActivaV2() {
     );
   };
 
+  // Complete the current task and update timeline
+  const handleCompleteTask = () => {
+    const currentTask = tasks.find(t => !t.completada);
+    if (!currentTask) return;
+
+    setTasks(currentTasks => 
+      currentTasks.map(task => {
+        if (task.id === currentTask.id) {
+          return {
+            ...task,
+            completada: true,
+            tiempoFin: new Date(),
+            tiempoRestante: 0,
+            temporizador: null
+          };
+        }
+        return task;
+      })
+    );
+    
+    // Clear any active deadline for this task
+    if (activeDeadline?.taskId === currentTask.id) {
+      setActiveDeadline(null);
+    }
+    
+    Alert.alert('¡Tarea Completada!', 'La tarea se ha marcado como completada exitosamente.');
+  };
+  
+  // Navigate to observations screen
+  const handleNext = () => {
+    const visitData = {
+      id: '123', // Replace with actual visit ID
+      cliente: visita.cliente,
+      direccion: visita.direccion,
+      fecha: visita.fecha,
+      hora: visita.hora,
+      tareas: tasks.map(task => ({
+        id: task.id,
+        descripcion: task.descripcion,
+        completada: task.completada,
+        tiempoInicio: task.tiempoInicio,
+        tiempoFin: task.tiempoFin || new Date()
+      })),
+      fotos: photos
+    };
+    
+    router.push({
+      pathname: '/(tabs)/visitas/observaciones',
+      params: { visitData: JSON.stringify(visitData) }
+    });
+  };
+
+  // Check task completion status
+  const hasIncompleteTasks = tasks.some(task => !task.completada);
+  const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completada);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -394,7 +450,24 @@ export default function VisitaActivaV2() {
 
       {/* Footer */}
       <View style={styles.footer}>
-      
+        {hasIncompleteTasks ? (
+          <TouchableOpacity 
+            style={styles.completeButton}
+            onPress={handleCompleteTask}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.completeButtonText}>Terminar Tarea</Text>
+          </TouchableOpacity>
+        ) : allTasksCompleted ? (
+          <TouchableOpacity 
+            style={styles.nextButton}
+            onPress={handleNext}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.nextButtonText}>Siguiente</Text>
+            <ChevronRight size={20} color="white" style={styles.buttonIcon} />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {/* Debug Modal */}
@@ -660,13 +733,49 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(244, 67, 54, 0.8)',
   },
   footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
+  },
+  completeButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  completeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  nextButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  nextButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  buttonIcon: {
+    marginLeft: 4,
   },
   timerContainer: {
     flexDirection: 'row',
