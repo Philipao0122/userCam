@@ -9,7 +9,7 @@ const { width: screenWidth } = Dimensions.get('window');
 
 export default function CameraScreen() {
   const router = useRouter();
-  const { addPhoto } = usePhoto();
+  const { addPhoto, isUploading, uploadError } = usePhoto();
   const [cameraType, setCameraType] = useState('back');
   const [flash, setFlash] = useState('off');
   const [permission, requestPermission] = useCameraPermissions();
@@ -24,7 +24,8 @@ export default function CameraScreen() {
         const photoResult = await cameraRef.current.takePictureAsync({
           quality: 0.8,
           base64: true,
-          exif: false
+          exif: false,
+          skipProcessing: true
         });
         setPhoto(photoResult);
       } catch (error) {
@@ -40,14 +41,14 @@ export default function CameraScreen() {
     setIsSaving(true);
     
     try {
-      // Save photo to context
+      // Guardar la foto (se subirá a Cloudinary automáticamente)
       await addPhoto(photo.base64);
       
-      // Go back to previous screen
+      // Navegar de regreso
       router.back();
     } catch (error) {
       console.error('Error saving photo:', error);
-      Alert.alert('Error', 'No se pudo guardar la foto. Por favor, inténtalo de nuevo.');
+      Alert.alert('Error', error.message || 'No se pudo guardar la foto. Por favor, inténtalo de nuevo.');
     } finally {
       setIsSaving(false);
     }
@@ -131,39 +132,6 @@ export default function CameraScreen() {
               <>
                 <Ionicons name="checkmark" size={24} color="white" />
                 <Text style={[styles.buttonText, styles.acceptButtonText]}>Accept</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  // Photo preview view
-  if (photo) {
-    return (
-      <View style={styles.container}>
-        <Image source={{ uri: photo.uri }} style={styles.preview} />
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.retakeButton]}
-            onPress={handleRetake}
-            disabled={isSaving}
-          >
-            <Ionicons name="camera-reverse" size={24} color="white" />
-            <Text style={styles.actionButtonText}>Volver a tomar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.acceptButton, isSaving && styles.disabledButton]} 
-            onPress={handleAcceptPhoto}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <>
-                <Ionicons name="checkmark" size={24} color="white" />
-                <Text style={styles.actionButtonText}>Aceptar</Text>
               </>
             )}
           </TouchableOpacity>
